@@ -1,0 +1,34 @@
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0a9ca0496f746e6e0
+      InstanceType: t2.micro
+      Tags:
+        - Key: Name
+          Value: "WinTest01"
+        - Key: NameOfService
+          Value: "Win 10 VM"
+      SecurityGroups:
+        - !Ref MySecurityGroup
+      KeyName: awsPSKeyPair
+      UserData:
+        'Fn::Base64':
+            <powershell>
+            Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'));
+            </powershell>
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: SimpleWinGroup
+      GroupDescription: Enable RDP traffic via port 3389
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+Outputs:
+  ServerDns:
+    Value: !GetAtt
+      - Ec2Instance
+      - PublicDnsName
